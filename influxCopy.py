@@ -3,6 +3,7 @@
 
 import sys
 from datetime import datetime
+from datetime import timedelta
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 import numpy
@@ -43,69 +44,85 @@ points = list(result.get_points())
 #print(len(points[1]))
 
 
-#utc_time = starttime.replace(tzinfo = timezone.utc)
-timestamp = starttime.timestamp()*1000
-start_str = str(int((timestamp)*1000000))
+##utc_time = starttime.replace(tzinfo = timezone.utc)
+#timestamp = starttime.timestamp()*1000
+#start_str = str(int((timestamp)*1000000))
 
 #utc_time = endtime.replace(tzinfo = timezone.utc)
-timestamp = endtime.timestamp()*1000
-end_str=str(int((timestamp)*1000000))
+#timestamp = endtime.timestamp()*1000
+#end_str=str(int((timestamp)*1000000))
+
+#tempstart=starttime
+#tempend=starttime + timedelta(minutes=5)
 
 for i in range(len(points)):
-	read = points[i]['key']
-	sname = read.split(',')[0]
-	tagname = read.split(',')[1].split('=')[0]
-	tagvalue = read.split(',')[1].split('=')[1]
+	#utc_time = starttime.replace(tzinfo = timezone.utc)
+	tempstart=starttime
+	tempend=starttime + timedelta(minutes=5)
+
 	print("Getting data")
-	#print(sname,tagname,tagvalue)
-	query = 'SELECT "value" FROM '+ sname +' WHERE "'+ tagname +'" = \''+ tagvalue +'\' and time > '+start_str+' and time < '+end_str
-	#print(query)
-	result = client.query(query)
+	while tempend<endtime:
+		timestamp = tempstart.timestamp()*1000
+		start_str = str(int((timestamp)*1000000))
 
-	pointstemp = list(result.get_points())
+		#utc_time = endtime.replace(tzinfo = timezone.utc)
+		timestamp = tempend.timestamp()*1000
+		end_str=str(int((timestamp)*1000000))
+		tempstart=tempend + timedelta(microseconds=100)
+		tempend=tempstart+timedelta(minutes=5)
+		read = points[i]['key']
+		sname = read.split(',')[0]
+		tagname = read.split(',')[1].split('=')[0]
+		tagvalue = read.split(',')[1].split('=')[1]
+		#print("Getting data")
+		#print(sname,tagname,tagvalue)
+		query = 'SELECT "value" FROM '+ sname +' WHERE "'+ tagname +'" = \''+ tagvalue +'\' and time > '+start_str+' and time < '+end_str
+		#print(query)
+		result = client.query(query)
 
-	values =  map(operator.itemgetter('value'), pointstemp)
-	times  =  map(operator.itemgetter('time'),  pointstemp)
-	#print(values)
-	#data.value =  map(operator.itemgetter('value'), points)
-	#data.time  =  map(operator.itemgetter('time'),  points)
-	#
-	value = list(values)
-	time1 = list(times)
-	#print(len(value))
-	#print(len(time1))
-	#print(value)
-	if len(time1)>0:
-		myTime = datetime.strptime(time1[0], "%Y-%m-%dT%H:%M:%S.%fZ")
-		timestamp1 = datetime.timestamp(myTime)
-		timestamp= float(timestamp1)*1000
-		data = []
-		j=0
-		while j< len(value):
-		    myTime = datetime.strptime(time1[j], "%Y-%m-%dT%H:%M:%S.%fZ")
-		    timestamp = datetime.timestamp(myTime)
-		    temp= float(timestamp)*1000
-		    datatime=int(temp)
-		    data.append("{series},location={location},datatime={time1} value={z} {timestamp}"
-			    .format(series=sname,
-				    id=i,
-				    location=tagvalue,
-				    time1=time1[j],
-				    z=value[j],
-				    timestamp=datatime))
-		    j+=1
-		print("Received series", sname)
-		print("Uploading series to Database")
-		try:
-			client1 = InfluxDBClient(host=lIP, port=8086)
-			client1.write_points(data, database=lDB, time_precision='ms', batch_size=10000, protocol='line')
+		pointstemp = list(result.get_points())
 
-		except InfluxDBClientError as error:
-			continue
+		values =  map(operator.itemgetter('value'), pointstemp)
+		times  =  map(operator.itemgetter('time'),  pointstemp)
+		#print(values)
+		#data.value =  map(operator.itemgetter('value'), points)
+		#data.time  =  map(operator.itemgetter('time'),  points)
+		#
+		value = list(values)
+		time1 = list(times)
+		#print(len(value))
+		#print(len(time1))
+		#print(value)
+		if len(time1)>0:
+			myTime = datetime.strptime(time1[0], "%Y-%m-%dT%H:%M:%S.%fZ")
+			timestamp1 = datetime.timestamp(myTime)
+			timestamp= float(timestamp1)*1000
+			data = []
+			j=0
+			while j< len(value):
+			    myTime = datetime.strptime(time1[j], "%Y-%m-%dT%H:%M:%S.%fZ")
+			    timestamp = datetime.timestamp(myTime)
+			    temp= float(timestamp)*1000
+			    datatime=int(temp)
+			    data.append("{series},location={location} value={z} {timestamp}"
+				    .format(series=sname,
+					    id=i,
+					    location=tagvalue,
+					    z=value[j],
+					    timestamp=datatime))
+			    j+=1
+			print("Received series", sname)
+			print("Uploading series to Database")
+			try:
+				client1 = InfluxDBClient(host=lIP, port=8086)
+				client1.write_points(data, database=lDB, time_precision='ms', batch_size=10000, protocol='line')
 
-		print("\nSeries Uploaded")
-	else:
-		print("No data within time range\n")
+			except InfluxDBClientError as error:
+				continue
+
+			print("\nSeries Uploaded")
+		else:
+			print("No data within time range\n")
 print("Data copying complete")
 #end=time.time()
 #print("%s seconds" % (time.time() - start_time))
