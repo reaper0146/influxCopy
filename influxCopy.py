@@ -39,21 +39,6 @@ query = 'show series'
 result = client.query(query)
 
 points = list(result.get_points())
-#value =  np.append(value,np.array(list(map(operator.itemgetter('value'), points))))
-#print(points)
-#print(len(points[1]))
-
-
-##utc_time = starttime.replace(tzinfo = timezone.utc)
-#timestamp = starttime.timestamp()*1000
-#start_str = str(int((timestamp)*1000000))
-
-#utc_time = endtime.replace(tzinfo = timezone.utc)
-#timestamp = endtime.timestamp()*1000
-#end_str=str(int((timestamp)*1000000))
-
-#tempstart=starttime
-#tempend=starttime + timedelta(minutes=5)
 
 for i in range(len(points)):
 	#utc_time = starttime.replace(tzinfo = timezone.utc)
@@ -74,25 +59,15 @@ for i in range(len(points)):
 		sname = read.split(',')[0]
 		tagname = read.split(',')[1].split('=')[0]
 		tagvalue = read.split(',')[1].split('=')[1]
-		#print("Getting data")
-		#print(sname,tagname,tagvalue)
 		query = 'SELECT "value" FROM '+ sname +' WHERE "'+ tagname +'" = \''+ tagvalue +'\' and time > '+start_str+' and time < '+end_str
-		#print(query)
 		result = client.query(query)
 
 		pointstemp = list(result.get_points())
 
 		values =  map(operator.itemgetter('value'), pointstemp)
 		times  =  map(operator.itemgetter('time'),  pointstemp)
-		#print(values)
-		#data.value =  map(operator.itemgetter('value'), points)
-		#data.time  =  map(operator.itemgetter('time'),  points)
-		#
 		value = list(values)
 		time1 = list(times)
-		#print(len(value))
-		#print(len(time1))
-		#print(value)
 		if len(time1)>0:
 			myTime = datetime.strptime(time1[0], "%Y-%m-%dT%H:%M:%S.%fZ")
 			timestamp1 = datetime.timestamp(myTime)
