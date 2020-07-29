@@ -16,9 +16,11 @@ from numpy import array
 
 #start_time = time.time()
 
-starttime = datetime(2020,7, 17,8,5,15)
-endtime = datetime(2020, 7, 17,20,15,15)
+start="2020-07-17 08:05:15"
+end="2020-07-17 20:05:15"
 
+starttime=datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
+endtime=datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
 
 rIP = sys.argv[1]
 rUser = sys.argv[2]
