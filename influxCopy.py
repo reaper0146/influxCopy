@@ -6,13 +6,7 @@ from datetime import datetime
 from datetime import timedelta
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
-import numpy
-import time
-import random
 import operator
-import sys
-import numpy as np
-from numpy import array
 
 #start_time = time.time()
 
