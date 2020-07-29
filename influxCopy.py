@@ -62,16 +62,16 @@ for i in range(len(points)):
 
 		values =  map(operator.itemgetter('value'), pointstemp)
 		times  =  map(operator.itemgetter('time'),  pointstemp)
-		value = list(values)
-		time1 = list(times)
-		if len(time1)>0:
-			myTime = datetime.strptime(time1[0], "%Y-%m-%dT%H:%M:%S.%fZ")
+		valuelist = list(values)
+		timelist = list(times)
+		if len(timelist)>0:
+			myTime = datetime.strptime(timelist[0], "%Y-%m-%dT%H:%M:%S.%fZ")
 			timestamp1 = datetime.timestamp(myTime)
 			timestamp= float(timestamp1)*1000
 			data = []
 			j=0
-			while j< len(value):
-			    myTime = datetime.strptime(time1[j], "%Y-%m-%dT%H:%M:%S.%fZ")
+			while j< len(valuelist):
+			    myTime = datetime.strptime(timelist[j], "%Y-%m-%dT%H:%M:%S.%fZ")
 			    timestamp = datetime.timestamp(myTime)
 			    temp= float(timestamp)*1000
 			    datatime=int(temp)
@@ -79,7 +79,7 @@ for i in range(len(points)):
 				    .format(series=sname,
 					    id=i,
 					    location=tagvalue,
-					    z=value[j],
+					    z=valuelist[j],
 					    timestamp=datatime))
 			    j+=1
 			print("Received series", sname)
@@ -91,7 +91,7 @@ for i in range(len(points)):
 			except InfluxDBClientError as error:
 				continue
 
-			print("\nSeries Uploaded")
+			print("Series Uploaded\n")
 		else:
 			print("No data within time range\n")
 print("Data copying complete")
