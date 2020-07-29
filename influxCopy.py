@@ -55,7 +55,7 @@ for i in range(len(points)):
 		sname = read.split(',')[0]
 		tagname = read.split(',')[1].split('=')[0]
 		tagvalue = read.split(',')[1].split('=')[1]
-		query = 'SELECT * FROM '+ sname +' WHERE "'+ tagname +'" = \''+ tagvalue +'\' and time > '+start_str+' and time < '+end_str
+		query = 'SELECT "value" FROM '+ sname +' WHERE "'+ tagname +'" = \''+ tagvalue +'\' and time > '+start_str+' and time < '+end_str
 		result = client.query(query)
 
 		pointstemp = list(result.get_points())
